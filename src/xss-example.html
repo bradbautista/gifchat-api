@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>XSS Example</title>
+</head>
+<body>
+  <div class="content"></div>
+  <button class="make-request">Make request</button>
+<script>
+  document.querySelector('.make-request').addEventListener('click', e => {
+    fetch('http://localhost:17043/articles/911')
+      .then(res => res.json())
+      .then(body => {
+        document.querySelector('.content').innerHTML = body.content
+      })
+  })
+</script>
+</body>
+</html>
