@@ -1,4 +1,4 @@
-# Blogful API!
+# Noteful API
 
 ## Scripts
 
