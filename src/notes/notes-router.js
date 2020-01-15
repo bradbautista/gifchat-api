@@ -37,13 +37,13 @@ notesRouter
       req.app.get('db'),
       newNote
     )
-      .then(note => {
+        .then(note => {
         res
           .status(201)
           .location(path.posix.join(req.originalUrl, `/${note.id}`))
           .json(serializeNote(note))
-      })
-      .catch(next)
+        })
+        .catch(next)
   })
 
 notesRouter
@@ -84,7 +84,6 @@ notesRouter
   .patch(jsonParser, (req, res, next) => {
     const { note_name, folder_id, content } = req.body
     const noteToUpdate = { note_name, folder_id, content }
-
     
     const numberOfValues = Object.values(noteToUpdate).filter(Boolean).length
     if (numberOfValues === 0) {
@@ -100,8 +99,10 @@ notesRouter
       req.params.note_id,
       noteToUpdate
     )
-    .then(numRowsAffected => {
-      res.status(204).end()
+    .then(note => {
+      res
+        .status(200)
+        .json(serializeNote(note))
     })
     .catch(next)
   })

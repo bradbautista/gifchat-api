@@ -97,9 +97,11 @@ foldersRouter
       req.params.folder_id,
       folderToUpdate
     )
-    .then(numRowsAffected => {
-      res.status(204).end()
-    })
+    .then(folder => {
+        res
+          .status(200)
+          .json(serializeFolder(folder))
+      })
     .catch(next)
   })
 
