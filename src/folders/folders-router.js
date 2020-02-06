@@ -12,6 +12,9 @@ const serializeFolder = folder => ({
 })
 
 foldersRouter
+
+  // Ultimately we only want to service requests to /rooms/:roomId and /randos/:roomId
+
   .route('/')
   .get((req, res, next) => {
     const knexInstance = req.app.get('db')
