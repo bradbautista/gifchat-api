@@ -47,34 +47,29 @@ app.use(function errorHandler(error, req, res, next) {
 })
 
 io.on('connection', (socket) => {
+
   console.log('A user has connected to the socket')
-  // console.log(socket.handshake.headers.referer)
-  // console.log(io)
-  // console.log(server)
-
-  socket.emit('chat message', 'Hello there')
-
+  // console.log(socket.handshake)
+  
   // We're using regex to get the room name; this will pull everything after the last slash in the url; .exec returns an array, but the first item in it is what we want
   const roomRegEx = /([^/]+$)/
   const room = roomRegEx.exec(socket.handshake.headers.referer)[0] || ''
-  console.log(socket.handshake.headers)
+  // console.log(socket.handshake.headers)
 
   socket.join(room, () => {
     let rooms = Object.keys(socket.rooms);
     console.log(rooms);
   })
-  // console.log('user joined room ' + room + ' at ' + Date());
 
+  console.log('user joined room ' + room + ' at ' + Date());
 
   socket.on('disconnect', function() {
     socket.leave(room)
-    console.log('user disconnected');
+    console.log('user disconnected from room ' + room + ' at ' + Date());
   });
   
-  socket.on('chat message', (msg) => {
-    console.log(msg)
-    // io.to(room).emit('chat message', msg)
-    // console.log(msg)
+  socket.on('chat message', function(msg){
+    io.to(room).emit('chat message', msg)
   })
 
 })
