@@ -6,12 +6,22 @@ const path = require('path')
 const roomsRouter = express.Router()
 const jsonParser = express.json()
 
-// So: /rooms/ will accept only post requests; the server will respond to these requests by creating a room/socket at a randomly generated URL and send that URL back to the client
+// /rooms/ accepts only post requests; the server responds to those requests by creating a room at a randomly generated URL and sending that URL back to the client
 
 
-// At /rooms/:roomId, we will be servicing get requests that will retrieve the list of messages in the conversation from the server; intially this will be an empty array, which is fine. Idk about the need to send post requests vs emittences ... we'll have to see!
+// At /rooms/:room, we service: 
+//   - Get requests that retrieve the list of messages in the conversation
+//   - Patch requests that add messages to the conversation column array
+//   - Put requests that update the last_connection column with a new Date()
 
-// Also, the server needs to check to see how many people are in the room when a connection attempt is made to /rooms/:roomId; if there are two people in there, refuse the connection
+// TO DO:
+
+// For all requests, the server needs to check the room name against the
+// database and refuse the connection if the room does not exist
+
+// The server needs to check to see how many people are in the room when a connection attempt is made to /rooms/:room; if there are two people in there, refuse the connection
+
+// Figure out how and where to cull convos
 
 roomsRouter
 
@@ -33,17 +43,14 @@ roomsRouter
         .catch(next)
     })
 
-    // On a 
-
-roomsRouter
-
-    
+roomsRouter   
 
     .route('/:room')
 
-    // Retrieve messages on room entry (usually an empty array)
+    // For a new room, messages will be an empty array; this is fine
     .get((req, res, next) => {
 
+        // 0 = '/'
         const room = req.url.slice(1)
 
         RoomsService.getAllMessages(req.app.get('db'), room)
@@ -53,8 +60,8 @@ roomsRouter
             .catch(next)
       })
 
-    // Adding to conversation. We're doing this over HTTP rather than having the server take care of everything in app.js because firing addToConversation in the on.('chat message') event there does not update the database for reasons that are not obvious to me even after debugging the server and investigating postgres logs
-    .patch(jsonParser, (req, res, next) => {
+    // Adding to conversation. We're doing this here instead of in app.js because firing addToConversation in the on.('chat message') event there does not update the database for reasons that are not obvious to me even after debugging the server and investigating postgres logs
+    .patch(jsonParser, (req, res, next) => { 
         
         const room = req.url.slice(1)
 
@@ -75,11 +82,14 @@ roomsRouter
 
         const { date } = req.body
 
-        // console.log(RoomsService.reportConnection(
-        //     req.app.get('db'),
-        //     date,
-        //     room
-        // ).toString())
+        console.log(date)
+        console.log(room)
+
+        console.log(RoomsService.reportConnection(
+            req.app.get('db'),
+            date,
+            room
+        ).toString())
 
         RoomsService.reportConnection(
             req.app.get('db'),

@@ -6,22 +6,16 @@ const RoomsService = {
       return knex.select('messages').from('gifchat_conversations').where('conversation_location', roomName)
     },
 
-    reportConnection(knex, roomName) {
-
-        const date = new Date().toString()
+    reportConnection(knex, date, room) {
         
         // Our query structure:
         // UPDATE gifchat_conversations 
         // SET last_connection = '08 Jan 1970 00:00:00 GMT' 
         // WHERE conversation_location = 'a-marked-gold-crane-named-Tonie';
 
-        // return knex('gifchat_conversations')
-        // .where('conversation_location', roomName)
-        // .update('last_connection', date)
-
-        return knex.raw(
-            `UPDATE gifchat_conversations SET last_connection = '${date}' WHERE conversation_location = '${roomName}';`
-        )
+        return knex('gifchat_conversations')
+        .where('conversation_location', room)
+        .update('last_connection', date)
 
     },
 
@@ -54,6 +48,7 @@ const RoomsService = {
 
         // Using raw here because knex mangles the array concat syntax
         // and also because it's more readable
+        
         return knex.raw(
             `UPDATE gifchat_conversations SET messages = messages || '{${msg}}' WHERE conversation_location = '${room}';`
         )
