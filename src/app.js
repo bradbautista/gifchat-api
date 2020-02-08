@@ -12,6 +12,7 @@ const { NODE_ENV } = require('./config')
 const notesRouter = require('./notes/notes-router')
 const foldersRouter = require('./folders/folders-router')
 const roomsRouter = require('./rooms/rooms-router')
+const RoomsService = require('./rooms/rooms-service')
 
 
 
@@ -70,6 +71,8 @@ io.on('connection', (socket) => {
   
   socket.on('chat message', function(msg){
     io.to(room).emit('chat message', msg)
+    // RoomsService.addToConversation(db, msg, room)
+
   })
 
 })
@@ -77,9 +80,5 @@ io.on('connection', (socket) => {
 server.listen(PORT, () => {
   console.log(`Server listening at http://localhost:${PORT}`)
 })
-
-// app.listen(17042, () => {
-//   console.log(`Server listening at http://localhost:17042`)
-// })
 
 module.exports = app

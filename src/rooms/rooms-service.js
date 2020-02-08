@@ -6,6 +6,25 @@ const RoomsService = {
       return knex.select('messages').from('gifchat_conversations').where('conversation_location', roomName)
     },
 
+    reportConnection(knex, roomName) {
+
+        const date = new Date().toString()
+        
+        // Our query structure:
+        // UPDATE gifchat_conversations 
+        // SET last_connection = '08 Jan 1970 00:00:00 GMT' 
+        // WHERE conversation_location = 'a-marked-gold-crane-named-Tonie';
+
+        // return knex('gifchat_conversations')
+        // .where('conversation_location', roomName)
+        // .update('last_connection', date)
+
+        return knex.raw(
+            `UPDATE gifchat_conversations SET last_connection = '${date}' WHERE conversation_location = '${roomName}';`
+        )
+
+    },
+
     insertConversation(knex, randomName) {
         return knex
           .insert([
@@ -17,16 +36,11 @@ const RoomsService = {
 
     getRoomName() {
 
-        // These three variable declarations set up our URL scheme. 'A' & 'named' are established as dictionaries in order to get the flavor/human readabilty we want. There are going to be a/an disagreements; I have played with a couple of ways to get around this but with the way the package implemented it's not straightfoward.
+        // These three variable declarations set up our URL scheme. 'A' & 'named' are established as dictionaries in order to get the flavor/human readabilty we want. There are going to be a/an disagreements; I have played with a couple of ways to get around this but with the way the package is implemented it's not straightfoward.
 
-        const a = [
-            'a'
-        ]
-    
-        const named = [
-            'named'
-        ]
-    
+        const a = ['a']    
+        const named = ['named']
+
         const randomName = uniqueNamesGenerator({ 
             dictionaries: [a, adjectives, colors, animals, named, names],
             separator: '-',
@@ -34,6 +48,16 @@ const RoomsService = {
         })
 
         return randomName;
+    },
+
+    addToConversation(knex, msg, room) {
+
+        // Using raw here because knex mangles the array concat syntax
+        // and also because it's more readable
+        return knex.raw(
+            `UPDATE gifchat_conversations SET messages = messages || '{${msg}}' WHERE conversation_location = '${room}';`
+        )
+
     }
 
 

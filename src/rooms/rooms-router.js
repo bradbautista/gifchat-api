@@ -35,7 +35,61 @@ roomsRouter
 
     // On a 
 
-// roomsRouter
-//     .route('/:room')
+roomsRouter
+
+    
+
+    .route('/:room')
+
+    // Retrieve messages on room entry (usually an empty array)
+    .get((req, res, next) => {
+
+        const room = req.url.slice(1)
+
+        RoomsService.getAllMessages(req.app.get('db'), room)
+            .then(messages => {
+                res.json(messages)
+            })
+            .catch(next)
+      })
+
+    // Adding to conversation. We're doing this over HTTP rather than having the server take care of everything in app.js because firing addToConversation in the on.('chat message') event there does not update the database for reasons that are not obvious to me even after debugging the server and investigating postgres logs
+    .patch(jsonParser, (req, res, next) => {
+        
+        const room = req.url.slice(1)
+
+        const { msg } = req.body
+
+        RoomsService.addToConversation(
+            req.app.get('db'),
+            msg,
+            room
+        )
+        .then(() => { res.status(201) })
+        .catch(next)
+    })
+
+    .put(jsonParser, (req, res, next) => {
+
+        const room = req.url.slice(1)
+
+        const { date } = req.body
+
+        // console.log(RoomsService.reportConnection(
+        //     req.app.get('db'),
+        //     date,
+        //     room
+        // ).toString())
+
+        RoomsService.reportConnection(
+            req.app.get('db'),
+            date,
+            room
+        )
+        .then(() => { res.status(201) })
+        .catch(next)
+    })
+
+    
 
 module.exports = roomsRouter
