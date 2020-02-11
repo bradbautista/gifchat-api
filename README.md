@@ -1,4 +1,4 @@
-# Noteful API
+# Gifchat API
 
 ## Scripts
 
