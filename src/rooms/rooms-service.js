@@ -14,11 +14,6 @@ const RoomsService = {
 
     reportConnection(knex, date, room) {
         
-        // Our query structure:
-        // UPDATE gifchat_conversations 
-        // SET last_connection = '08 Jan 1970 00:00:00 GMT' 
-        // WHERE conversation_location = 'a-marked-gold-crane-named-Tonie';
-
         dateInt = parseInt(date)
 
         return knex('gifchat_conversations')

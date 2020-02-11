@@ -98,6 +98,8 @@ roomsRouter
     // firing addToConversation in the on.('chat message') event there does not 
     // update the database for reasons that are not obvious to me even after 
     // debugging the server and investigating postgres logs. We don't need to
+    // check socket.connected here because the user can't emit messages if they're
+    // not connected to the socket.
     .patch(jsonParser, (req, res, next) => { 
         
         const room = req.url.slice(1)
@@ -109,7 +111,7 @@ roomsRouter
             msg,
             room
         )
-        .then(() => { res.status(201) })
+        .then(() => res.status(201).end() )
         .catch(next)
     })
 
@@ -124,7 +126,7 @@ roomsRouter
             date,
             room
         )
-        .then(() => { res.status(201) })
+        .then(() => res.status(201).end() )
         .catch(next)
     })
 
