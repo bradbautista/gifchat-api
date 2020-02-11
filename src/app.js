@@ -9,17 +9,40 @@ const morgan = require('morgan')
 const cors = require('cors')
 const helmet = require('helmet')
 const { NODE_ENV } = require('./config')
-const notesRouter = require('./notes/notes-router')
-const foldersRouter = require('./folders/folders-router')
 const roomsRouter = require('./rooms/rooms-router')
 const RoomsService = require('./rooms/rooms-service')
-
-
+const randosRouter = require('./randos/randos-router')
+const cron = require("node-cron");
 
 const db = knex({
   client: 'pg',
   connection: DATABASE_URL,
 })
+
+// Cron job to cull old chats and unused rooms.
+// Scheduled for midnight.
+
+// * * * * * *
+// | | | | | |
+// | | | | | day of week
+// | | | | month
+// | | | day of month
+// | | hour
+// | minute
+// second ( optional )
+
+cron.schedule("0 0 0 * * *", function() {
+
+  // The knex promises need to be returned, so let's
+  // add some utility by logging the work our functions
+  // have done for admin QoL.
+
+  RoomsService.deleteUnusedRooms(db).then(x => console.log(`Deleted ${x} unused rooms.`))
+  RoomsService.deleteOldConversations(db).then(x => console.log(`Deleted ${x.rowCount} expired rooms.`))
+  console.log('Cron job ran')
+
+});
+
 
 app.set('db', db)
 
@@ -27,14 +50,9 @@ app.use(morgan((NODE_ENV === 'production') ? 'tiny' : 'common'))
 app.use(cors())
 app.use(helmet())
 
-// We will want /rooms, /randos
-app.use('/notes', notesRouter)
-app.use('/folders', foldersRouter)
+// We will want /rooms, /randos, possibly a * or .get all for all other routes? See S/O tabs -- also mb app.error!
 app.use('/rooms', roomsRouter)
-
-app.get('/', (req, res) => {
-  res.send('Hello, world!')
-})
+app.use('/randos', randosRouter)
 
 app.use(function errorHandler(error, req, res, next) {
   let response
@@ -57,10 +75,21 @@ io.on('connection', (socket) => {
   const room = roomRegEx.exec(socket.handshake.headers.referer)[0] || ''
   // console.log(socket.handshake.headers)
 
-  socket.join(room, () => {
-    let rooms = Object.keys(socket.rooms);
-    console.log(rooms);
+  // This returns the no. of users in ${room}, but it is an array length;
+  // ergo, 1 is 2. So, check to see how many clients are connected; if it's
+  // two, disconnect. This functions more like a bouncer than a locked door,
+  // but I don't know of a way to lock the door and it works.
+  io.sockets.adapter.clients([room], function(err, clients){
+    (clients.length > 1)
+    ? socket.disconnect(true)
+    : socket.join(room)
   })
+
+  socket.on('join', function() {
+    
+    console.log('Something')
+  })
+  
 
   console.log('user joined room ' + room + ' at ' + Date());
 

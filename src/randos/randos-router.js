@@ -1,48 +1,56 @@
 const express = require('express')
-const RoomsService = require('./rooms-service')
+const RoomsService = require('../rooms/rooms-service')
 const path = require('path')
-const roomsRouter = express.Router()
+const randosRouter = express.Router()
 const jsonParser = express.json()
 
-//  /rooms/ accepts only post requests; the server responds to those requests 
-//  by creating a room at a randomly generated URL and sending that URL 
-//  back to the client
+// Scope on these is intentional; the way the server responds
+// to post requests depends on value of lonelyRandos, and each request 
+// toggles the value; randoRoom gets overwritten as we match randos.
+// Defaults to true because first toggle sets the inital state we want.
+let lonelyRandos = true;
+let randoRoom = '';
 
-//  At /rooms/:room, we service: 
-//  - Get requests that retrieve the list of messages in the conversation
-//  - Patch requests that add messages to the conversation column array
-//  - Put requests that update the last_connection column with a new Date()
-
-//  For all requests, the server checks the room name against the
-//  database and refuses the request if the room does not exist
-
-//  TO DO:
-
-//  Implement randos
-
-
-
-roomsRouter
-
-    // On an empty post request (i.e., one coming from the "Get a room" button), create a new room with a randomly generated name in the database and have the database return that name, then send back the new room location in the header and send json of the room name to be displayed to the user.
+randosRouter
 
     .route('/')
     .post((req, res, next) => {
 
-        RoomsService.insertConversation(
-            req.app.get('db'),
-            RoomsService.getRoomName(),
-        )
-        .then(roomName => {
+        lonelyRandos = !lonelyRandos;
+
+        // If there is no rando waiting for a match, create a room
+        // and put the rando in it. If there is a lonely
+        // rando, put the inquirer in the room with the
+        // lonely rando. Preferring if to ternary here for
+        // readability.
+        if (lonelyRandos) {
             res
-                .status(201)
-                .location(path.posix.join(req.originalUrl, `/${roomName}`))
-                .json(roomName)
-        })
-        .catch(next)
+                .status(303)
+                .location(path.posix.join(req.originalUrl, `/${randoRoom}`))
+                .json(randoRoom)
+        
+        } else if (!lonelyRandos) {
+            
+            RoomsService.insertConversation(
+                req.app.get('db'),
+                RoomsService.getRoomName(),
+            )
+            .then(roomName => {
+                randoRoom = roomName,
+                res
+                    .status(303)
+                    .location(path.posix.join(req.originalUrl, `/${roomName}`))
+                    .json(roomName)
+            })
+            .catch(next)
+
+        }
+
     })
 
-roomsRouter   
+// Once they're in the room, it behaves the same as all other rooms
+
+randosRouter   
 
     .route('/:room')
 
@@ -51,7 +59,6 @@ roomsRouter
 
         // 0 = '/'
         const room = req.url.slice(1)
-
 
         RoomsService.getAllRooms(req.app.get('db'))
             .then(rooms => {
@@ -92,12 +99,14 @@ roomsRouter
             })
         }
 
+        RoomsService.getAllMessages(req.app.get('db'), room)
+            .then(messages => {
+                res.json(messages)
+            })
+            .catch(next)
       })
 
-    // Adding to conversation. We're doing this here instead of in app.js because 
-    // firing addToConversation in the on.('chat message') event there does not 
-    // update the database for reasons that are not obvious to me even after 
-    // debugging the server and investigating postgres logs. We don't need to
+    // Adding to conversation. We're doing this here instead of in app.js because firing addToConversation in the on.('chat message') event there does not update the database for reasons that are not obvious to me even after debugging the server and investigating postgres logs
     .patch(jsonParser, (req, res, next) => { 
         
         const room = req.url.slice(1)
@@ -128,4 +137,4 @@ roomsRouter
         .catch(next)
     })
 
-module.exports = roomsRouter
+module.exports = randosRouter
