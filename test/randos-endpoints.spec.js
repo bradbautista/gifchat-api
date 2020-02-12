@@ -30,7 +30,7 @@ describe('Randos endpoints', function() {
     // respond 303
 
     describe.only(`POST /randos/`, () => {
-        it(`creates a room, responding with 303`, function() {
+        it(`Responds with 303, either after creating a room or with the url of a room the user should be directed to`, function() {
         return supertest(app)
             .post('/randos/')
             .expect(303)
