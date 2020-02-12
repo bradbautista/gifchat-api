@@ -39,7 +39,6 @@ cron.schedule("0 0 0 * * *", function() {
 
   RoomsService.deleteUnusedRooms(db).then(x => console.log(`Deleted ${x} unused rooms.`))
   RoomsService.deleteOldConversations(db).then(x => console.log(`Deleted ${x.rowCount} expired rooms.`))
-  console.log('Cron job ran')
 
 });
 
@@ -67,13 +66,10 @@ app.use(function errorHandler(error, req, res, next) {
 
 io.on('connection', (socket) => {
 
-  console.log('A user has connected to the socket')
-  // console.log(socket.handshake)
   
   // We're using regex to get the room name; this will pull everything after the last slash in the url; .exec returns an array, but the first item in it is what we want
   const roomRegEx = /([^/]+$)/
   const room = roomRegEx.exec(socket.handshake.headers.referer)[0] || ''
-  // console.log(socket.handshake.headers)
 
   // This returns the no. of users in ${room}, but it is an array length;
   // ergo, 1 is 2. So, check to see how many clients are connected; if it's
@@ -85,22 +81,15 @@ io.on('connection', (socket) => {
     : socket.join(room)
   })
 
-  socket.on('join', function() {
-    
-    console.log('Something')
-  })
-  
-
-  console.log('user joined room ' + room + ' at ' + Date());
+  // console.log('user joined room ' + room + ' at ' + Date());
 
   socket.on('disconnect', function() {
     socket.leave(room)
-    console.log('user disconnected from room ' + room + ' at ' + Date());
+    // console.log('user disconnected from room ' + room + ' at ' + Date());
   });
   
   socket.on('chat message', function(msg){
     io.to(room).emit('chat message', msg)
-    // RoomsService.addToConversation(db, msg, room)
 
   })
 
