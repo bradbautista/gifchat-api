@@ -69,7 +69,7 @@ io.on('connection', (socket) => {
   
   // We're using regex to get the room name; this will pull everything after the last slash in the url; .exec returns an array, but the first item in it is what we want
   const roomRegEx = /([^/]+$)/
-  const room = roomRegEx.exec(socket.handshake.headers.referer)[0] || ''
+  const room = roomRegEx.exec(socket.handshake.headers.referer)[0] || 'room'
 
   // This returns the no. of users in ${room}, but it is an array length;
   // ergo, 1 is 2. So, check to see how many clients are connected; if it's
