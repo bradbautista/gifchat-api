@@ -24,15 +24,16 @@ describe('Randos endpoints', function() {
 
     // We only need to test the POST on this; once they're in
     // a room, code is the same as in /rooms/
+    //
+    // Post will behave differently on the server side depending
+    // on the state of a variable there, but either way it should
+    // respond 303
 
-    describe(`POST /randos/`, () => {
-        it(`creates a room, responding with 201 and an array`, function() {
+    describe.only(`POST /randos/`, () => {
+        it(`creates a room, responding with 303`, function() {
         return supertest(app)
             .post('/randos/')
-            .expect(201)
-            .expect(res => {
-            expect(res.body).to.be.an('array')
-            })
+            .expect(303)
         })
     })
 

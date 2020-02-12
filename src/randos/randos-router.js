@@ -88,7 +88,7 @@ randosRouter
         // conversations when they try to join full rooms, reject the request
         // if socket.connected logs false on the client side
         if (req.headers.isconnected === 'true') {
-            RoomsService.getAllMessages(req.app.get('db'), room)
+            return RoomsService.getAllMessages(req.app.get('db'), room)
             .then(messages => {
                 res.json(messages)
             })
