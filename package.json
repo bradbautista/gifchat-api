@@ -14,13 +14,16 @@
     "deploy": "git push heroku master"
   },
   "keywords": [],
+  "engines": {
+    "node": "10.11.0"
+  },
   "author": "Brad Bautista",
   "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^6.2.0",
     "express": "^4.16.4",
-    "helmet": "^3.15.0",
+    "helmet": "^3.21.2",
     "knex": "^0.19.5",
     "morgan": "^1.9.1",
     "node-cron": "^2.0.3",
