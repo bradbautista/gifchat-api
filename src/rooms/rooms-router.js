@@ -16,10 +16,6 @@ const jsonParser = express.json()
 //  For all requests, the server checks the room name against the
 //  database and refuses the request if the room does not exist
 
-//  TO DO:
-
-//  Implement randos
-
 
 
 roomsRouter
@@ -111,7 +107,7 @@ roomsRouter
             msg,
             room
         )
-        .then(() => res.status(201).end() )
+        .then(() => res.status(201).json({ "message" : "Conversation updated." }) )
         .catch(next)
     })
 
@@ -126,7 +122,7 @@ roomsRouter
             date,
             room
         )
-        .then(() => res.status(201).end() )
+        .then(() => res.status(201).json({ "message" : "Connection recorded."}) )
         .catch(next)
     })
 

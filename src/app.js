@@ -49,6 +49,8 @@ app.use(morgan((NODE_ENV === 'production') ? 'tiny' : 'common'))
 app.use(cors())
 app.use(helmet())
 
+app.get('/', (req, res) => res.send('Hello World!'))
+
 // We will want /rooms, /randos, possibly a * or .get all for all other routes? See S/O tabs -- also mb app.error!
 app.use('/rooms', roomsRouter)
 app.use('/randos', randosRouter)
@@ -65,32 +67,31 @@ app.use(function errorHandler(error, req, res, next) {
 })
 
 io.on('connection', (socket) => {
-
   
-  // We're using regex to get the room name; this will pull everything after the last slash in the url; .exec returns an array, but the first item in it is what we want
-  const roomRegEx = /([^/]+$)/
-  const room = roomRegEx.exec(socket.handshake.headers.referer)[0] || 'room'
+  // This pops a string out of an array, splits the string and pops the value we want. Easier to read than regEx and causes fewer issues.
+  let room = socket.handshake.headers.referer.split(',').pop().split('/').pop()
 
   // This returns the no. of users in ${room}, but it is an array length;
   // ergo, 1 is 2. So, check to see how many clients are connected; if it's
   // two, disconnect. This functions more like a bouncer than a locked door,
-  // but I don't know of a way to lock the door and it works.
+  // but I don't know of a way to lock the door and it works. The console logs
+  // are for troubleshooting in case of server issues.
   io.sockets.adapter.clients([room], function(err, clients){
     (clients.length > 1)
     ? socket.disconnect(true)
-    : socket.join(room)
+    : socket.join(room, function() {
+      console.log('user joined room ' + room + ' at ' + Date())
+    })
   })
 
-  // console.log('user joined room ' + room + ' at ' + Date());
 
   socket.on('disconnect', function() {
     socket.leave(room)
-    // console.log('user disconnected from room ' + room + ' at ' + Date());
+    console.log('user disconnected from room ' + room + ' at ' + Date());
   });
   
   socket.on('chat message', function(msg){
     io.to(room).emit('chat message', msg)
-
   })
 
 })

@@ -118,7 +118,7 @@ randosRouter
             msg,
             room
         )
-        .then(() => res.status(201).end())
+        .then(() => res.status(204))
         .catch(next)
     })
 
@@ -133,7 +133,7 @@ randosRouter
             date,
             room
         )
-        .then(() => res.status(201).end())
+        .then(() => res.status(204))
         .catch(next)
     })
 
