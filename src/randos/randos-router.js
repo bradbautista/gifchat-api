@@ -118,7 +118,7 @@ randosRouter
             msg,
             room
         )
-        .then(() => res.status(204))
+        .then(() => res.status(201).json({ "message" : "Conversation updated." }) )
         .catch(next)
     })
 
@@ -133,7 +133,7 @@ randosRouter
             date,
             room
         )
-        .then(() => res.status(204))
+        .then(() => res.status(201).json({ "message" : "Connection recorded."}) )
         .catch(next)
     })
 
