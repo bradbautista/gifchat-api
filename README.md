@@ -1,8 +1,6 @@
-# GifChat
+# GifChat server
 
-**Has postmodernity rendered you speechless? Does your soul yearn to express itself in a way words cannot? Do you like chatting, but hate typing? Do you like GIFs?**
-
-*GifChat is for you!*
+**If you have not already, please read the [GifChat client readme](https://github.com/bradbautista/gifchat-client) before proceeding.**
 
 ## Table of Contents
 [About](#about)
@@ -15,27 +13,22 @@
 <a name="about"></a>
 ## About
 
-GifChat is a pseudo-anonymous, self-cleaning chat service that only allows users to communicate via animated GIFs.
+Now that you know about how the service works, let's talk about the API that services it.
 
-### Pseudo-anonymous?
+GifChat's back end is comprised of an Express server utilizing socket.io coupled with a PostgreSQL database.
 
-GifChat does not care who you are. There is no sign-up process, no login process: Just grab a room and start chatting with a friend or stranger.
+The API services requests to two endpoints: /rooms/ and /randos/. For complete implementation details, see the /src/rooms/ and /src/randos/ directories.
 
-### If there are no accounts, how do I know who sent which message?
+Typical request patterns look like this:
 
-Good question! This is why only two people can share a room at a time. In that case, it's easy: Either you sent the message, in which case you know who sent it; or you did not, in which case you also know who sent it!
+* **A user visits the homepage and requests a room.**  This sends an empty POST request to /rooms/. The server generates a room, adds a conversation entry for that room to the database and sends the URL for the room back to the user.
+* **A user visits the homepage and requests a room with a stranger.** This also sends an empty POST request to the server, but that request encounters a state machine: The server tracks whether it has put anyone in a room since the last time someone requested a stranger; if it has not, it puts the new user in that room. If it has, it will generate a new room as above and put the user in it automatically.
+* **A user enters a room.** This sends a GET request to /rooms/:roomId or /randos/:roomId for the messages in that conversation, which are stored in an array in the database. After checking whether the connection is valid and the room is at capacity, the server grants the request; if not, it rejects it and the client displays an error. This also sends a PUT request to the server to update the last_connection value in the conversation entry in the database (more on why below). Entry to the room is also when the socket connection is made.
+* **A user sends a message.** This sends a PATCH request to the server with the URL of the GIF that has been added to the conversation. Due to socket.io, there is no need for the server to return the list of messages in the conversation; the client handles that, and can get them from the server by refreshing in the event that something happens to the connection.
 
-### How do I chat with a friend?
-Click on the "Get a room" button to generate a link to a room. You can copy the link, copy the URL or just type or say it to your friend: Room names are designed to be human-readable and fun to make them easy to remember and share.
+Additionally, the GifChat server will attempt to preen itself: At midnight every night, it will look for and delete rooms that have been created but not entered, or which have not been used for seven days.
 
-To enter a room, either paste the link to the room into your URL bar, or enter the name of your room, with hyphens, after clicking the "Go to room" button on the homepage.
-
-### How do I chat with a stranger?
-Click on the "Get a rando" button on the homepage to be taken to a room with a random person. This feature obviously benefits from higher user counts, but don't despair if no one's in your room: Leave them a GIF saying hello and check back later; you may find they left you a response!
-
-### Self-cleaning?
-
-GifChat rooms/conversations can and will die of neglect. If a room is generated but never entered, it will be deleted within 24 hours. Once a room has been entered, it's good for seven days past the time it was last entered. This means you can keep a room alive by using it. Have a fun interaction with a stranger and want to GIF with them some more? If you keep the room alive, you can keep the connection alive. Have a particularly funny exchange with a friend or looking for a GIF from one of your conversations? It'll be there, as long as you have recently.
+Because GifChat is hosted on Heroku currently, you may need to poke the server with a few requests initially in order to wake up the dyno it's on.
 
 <a name="tech"></a>
 ## Tech
