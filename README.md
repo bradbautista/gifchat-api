@@ -1,4 +1,4 @@
-# GifChat server
+# [GifChat](https://gifchat.now.sh/) server
 
 **If you have not already, please read the [GifChat client readme](https://github.com/bradbautista/gifchat-client) before proceeding.**
 
