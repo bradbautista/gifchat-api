@@ -15,7 +15,9 @@
 
 Now that you know about how the service works, let's talk about the API that services it.
 
-GifChat's back end is comprised of an Express server utilizing socket.io coupled with a PostgreSQL database.
+GifChat's back end is comprised of an Express server utilizing socket.io coupled with a PostgreSQL database. The database only stores URL references to GIFs; it does not store any actual images.
+
+If you're running it locally, the server will be listening on port 17043. To change this, change the value of the PORT field in src/config.js.
 
 The API services requests to two endpoints: /rooms/ and /randos/. For complete implementation details, see the /src/rooms/ and /src/randos/ directories.
 
