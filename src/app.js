@@ -51,9 +51,6 @@ app.use(morgan(NODE_ENV === 'production' ? 'tiny' : 'common'));
 app.use(cors());
 app.use(helmet());
 
-app.get('/', (req, res) => res.send('Hello World!'));
-
-// We will want /rooms, /randos, possibly a * or .get all for all other routes? See S/O tabs -- also mb app.error!
 app.use('/rooms', roomsRouter);
 app.use('/randos', randosRouter);
 
